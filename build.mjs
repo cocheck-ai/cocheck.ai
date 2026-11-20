@@ -16,14 +16,76 @@ function safeUrl(u) {
   const t = u.trim();
   return /^(https?:\/\/|mailto:|\/|#|[\w.-]+(\/|\.html|$))/i.test(t) && !/^\s*(javascript|data|vbscript):/i.test(t) ? t : "#";
 }
+// Footnotes: `[^label]` references, `[^label]: text` definitions (indented continuation lines, blank-separated
+// paragraphs allowed). Numbered in order of first reference. FN is the per-essay state while it is converted.
+let FN = null;
+function footnoteRef(label) {
+  if (!FN) throw new Error(`footnote reference [^${label}] outside an essay`);
+  if (!FN.defs.has(label)) throw new Error(`${FN.file}: footnote [^${label}] is referenced but never defined`);
+  let n = FN.order.indexOf(label) + 1;
+  if (!n) { FN.order.push(label); n = FN.order.length; }
+  const k = (FN.refs.get(label) || 0) + 1;
+  FN.refs.set(label, k);
+  const id = k === 1 ? `fnref-${n}` : `fnref-${n}-${k}`;
+  return `<sup class="fn-ref"><a href="#fn-${n}" id="${id}" role="doc-noteref" aria-label="Footnote ${n}">${n}</a></sup>`;
+}
+function extractFootnotes(src, file) {
+  const lines = src.replace(/\r\n?/g, "\n").split("\n");
+  const defs = new Map(), body = [];
+  const defRe = /^ {0,3}\[\^([^\]\s]+)\]:[ \t]?(.*)$/, indented = /^( {4}|\t)/;
+  let inFence = false;
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    if (/^```/.test(l)) inFence = !inFence;
+    const m = !inFence && l.match(defRe);
+    if (!m) { body.push(l); continue; }
+    if (defs.has(m[1])) throw new Error(`${file}: footnote [^${m[1]}] is defined twice`);
+    const buf = [m[2].trim()];
+    let lazy = buf[0] !== "";
+    while (i + 1 < lines.length) {
+      const nx = lines[i + 1];
+      if (indented.test(nx)) { buf.push(nx.replace(indented, "")); lazy = true; i++; continue; }
+      if (nx.trim() === "") {
+        let j = i + 1;
+        while (j < lines.length && lines[j].trim() === "") j++;
+        if (j < lines.length && indented.test(lines[j])) { for (; i + 1 < j; i++) buf.push(""); continue; }
+        break;
+      }
+      if (lazy && !defRe.test(nx) && !/^(```|#{1,6}\s|>|\s*[-*+]\s|\s*\d+[.)]\s)/.test(nx)) { buf.push(nx); i++; continue; }
+      break;
+    }
+    defs.set(m[1], buf.join("\n"));
+  }
+  return { body: body.join("\n"), defs };
+}
+function renderFootnotes() {
+  const items = [];
+  for (let n = 1; n <= FN.order.length; n++) {        // rendering a definition may append newly referenced labels
+    const label = FN.order[n - 1];
+    let html = markdown(FN.defs.get(label));
+    const refs = FN.refs.get(label);
+    const back = Array.from({ length: refs }, (_, j) => `<a href="#${j ? `fnref-${n}-${j + 1}` : `fnref-${n}`}" class="fn-back" role="doc-backlink" aria-label="Back to reference ${n}${refs > 1 ? `-${j + 1}` : ""}">&#8617;&#xFE0E;${refs > 1 ? `<sup>${j + 1}</sup>` : ""}</a>`).join(" ");
+    html = /<\/p>$/.test(html) ? html.replace(/<\/p>$/, ` ${back}</p>`) : `${html}\n<p>${back}</p>`;
+    items.push(`<li id="fn-${n}">${html}</li>`);
+  }
+  const unused = [...FN.defs.keys()].filter((l) => !FN.order.includes(l));
+  if (unused.length) throw new Error(`${FN.file}: footnote(s) defined but never referenced: ${unused.map((l) => `[^${l}]`).join(", ")}`);
+  return items.length ? `\n<section class="footnotes" role="doc-endnotes" aria-label="Footnotes"><ol>\n${items.join("\n")}\n</ol></section>` : "";
+}
+function essayHtml(body, file) {
+  const { body: text, defs } = extractFootnotes(body, file);
+  FN = { file, defs, order: [], refs: new Map() };
+  try { return markdown(text) + renderFootnotes(); } finally { FN = null; }
+}
 function inline(text) {
-  const codes = [];
+  const codes = [], notes = [];
   let s = text.replace(/`([^`]+)`/g, (_, c) => { codes.push(`<code>${esc(c)}</code>`); return `\u0000${codes.length - 1}\u0000`; });
+  s = s.replace(/\[\^([^\]\s]+)\]/g, (_, label) => { notes.push(footnoteRef(label)); return `\u0001${notes.length - 1}\u0001`; });
   s = esc(s);
   s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, t, u) => `<a href="${esc(safeUrl(u.replace(/&amp;/g, "&")))}">${t}</a>`);
   s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/(^|[^*\w])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>");
   s = s.replace(/(^|[^\w])_([^_\n]+)_(?!\w)/g, "$1<em>$2</em>");
-  return s.replace(/\u0000(\d+)\u0000/g, (_, i) => codes[+i]);
+  return s.replace(/\u0001(\d+)\u0001/g, (_, i) => notes[+i]).replace(/\u0000(\d+)\u0000/g, (_, i) => codes[+i]);
 }
 function markdown(src) {
   const lines = src.replace(/\r\n?/g, "\n").split("\n");
@@ -215,6 +277,19 @@ article h1{font-size:var(--fs-xl);margin-bottom:var(--s1)}
 article .meta{margin-bottom:var(--s4)}
 article p,article li{font-family:var(--serif);font-size:var(--fs-lg);line-height:1.7}
 article p.meta{font-family:var(--font);font-size:var(--fs-sm)}
+.fn-ref{font-family:var(--font);font-size:.6em;line-height:0;vertical-align:super;margin-left:1px}
+.fn-ref a{text-decoration:none;padding:0 2px;border-radius:var(--r-sm)}
+.fn-ref a:hover{text-decoration:underline}
+:target{scroll-margin-top:var(--s4)}
+.fn-ref a:target,.footnotes li:target{background:var(--before-tint)}
+.footnotes{margin-top:var(--s5);padding-top:var(--s3);border-top:1px solid var(--hairline);color:var(--ink-2)}
+.footnotes ol{margin:0;padding-left:var(--s3)}
+.footnotes li{font-family:var(--serif);font-size:var(--fs-md);line-height:1.6;margin:0 0 var(--s1);border-radius:var(--r-sm)}
+article .footnotes li p,article .footnotes li{font-size:var(--fs-md);line-height:1.6}
+.footnotes li p{margin:0 0 var(--s1)}
+.footnotes li p:last-child{margin-bottom:0}
+.footnotes li::marker{font-family:var(--font);font-size:var(--fs-sm);color:var(--ink-3)}
+.fn-back{text-decoration:none;font-family:var(--font)}
 footer{border-top:1px solid var(--hairline);color:var(--ink-2);font-size:var(--fs-sm)}
 footer .wrap{display:flex;justify-content:space-between;gap:var(--s2);flex-wrap:wrap;align-items:center;height:80px}
 @media (max-width:900px){
@@ -308,7 +383,10 @@ const essays = readdirSync(SRC).filter((f) => f.endsWith(".md")).sort().map((f) 
   const { meta, body } = frontMatter(readFileSync(join(SRC, f), "utf8"), f);
   const slug = f.replace(/\.md$/, "");
   if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) throw new Error(`${f}: slug must be lowercase letters, digits, hyphens`);
-  return { slug, ...meta, html: markdown(body) };
+  // the essay's own leading "# Title" duplicates the page heading; skip it when it matches the front-matter title
+  const lead = body.match(/^\s*#\s+(.*?)\s*#*\s*(\n|$)/);
+  const text = lead && lead[1] === meta.title ? body.slice(lead[0].length) : body;
+  return { slug, ...meta, html: essayHtml(text, f) };
 }).sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
 ESSAYS = essays;
 

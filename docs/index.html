@@ -141,6 +141,19 @@ article h1{font-size:var(--fs-xl);margin-bottom:var(--s1)}
 article .meta{margin-bottom:var(--s4)}
 article p,article li{font-family:var(--serif);font-size:var(--fs-lg);line-height:1.7}
 article p.meta{font-family:var(--font);font-size:var(--fs-sm)}
+.fn-ref{font-family:var(--font);font-size:.6em;line-height:0;vertical-align:super;margin-left:1px}
+.fn-ref a{text-decoration:none;padding:0 2px;border-radius:var(--r-sm)}
+.fn-ref a:hover{text-decoration:underline}
+:target{scroll-margin-top:var(--s4)}
+.fn-ref a:target,.footnotes li:target{background:var(--before-tint)}
+.footnotes{margin-top:var(--s5);padding-top:var(--s3);border-top:1px solid var(--hairline);color:var(--ink-2)}
+.footnotes ol{margin:0;padding-left:var(--s3)}
+.footnotes li{font-family:var(--serif);font-size:var(--fs-md);line-height:1.6;margin:0 0 var(--s1);border-radius:var(--r-sm)}
+article .footnotes li p,article .footnotes li{font-size:var(--fs-md);line-height:1.6}
+.footnotes li p{margin:0 0 var(--s1)}
+.footnotes li p:last-child{margin-bottom:0}
+.footnotes li::marker{font-family:var(--font);font-size:var(--fs-sm);color:var(--ink-3)}
+.fn-back{text-decoration:none;font-family:var(--font)}
 footer{border-top:1px solid var(--hairline);color:var(--ink-2);font-size:var(--fs-sm)}
 footer .wrap{display:flex;justify-content:space-between;gap:var(--s2);flex-wrap:wrap;align-items:center;height:80px}
 @media (max-width:900px){
@@ -190,7 +203,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s2);flex-wrap:
 <li><b>You review before and after</b><p>Open the review page, see each change next to the action responsible, and decide what stays.</p></li>
 </ol></section></main><aside class="side" aria-label="Essays"><div class="side-in"><h2>Essays</h2>
 <ul class="side-list">
-<li><a href="essays/example.html"><span class="t">Placeholder essay</span><span class="quiet">November 18, 2026 &middot; A placeholder that shows the essay pipeline. Not a real essay.</span></a></li>
+<li><a href="essays/0-preface.html"><span class="t">Preface</span><span class="quiet">November 20, 2026 &middot; We find ourselves at an unbelievable moment in time.</span></a></li>
+<li><a href="essays/1-on-the-definition-of-work.html"><span class="t">On the Definition of Work</span><span class="quiet">November 20, 2026 &middot; With that throat clearing out of the way, I have to admit that I struggled to find a good place to start.</span></a></li>
 </ul></div></aside></div></div>
 <footer><div class="wrap"><span>CoCheck is a preview release.</span></div></footer>
 <script>(function(){var a=document.getElementById("rel");if(a&&window.fetch){var c=window.AbortController?new AbortController():null,t=setTimeout(function(){if(c)c.abort()},3000);fetch("https://registry.npmjs.org/cocheck/latest",{signal:c?c.signal:undefined}).then(function(r){return r.ok?r.json():null}).then(function(j){clearTimeout(t);if(j&&typeof j.version==="string"&&/^[0-9A-Za-z.+-]{1,40}$/.test(j.version))a.textContent="CoCheck "+j.version+" is out"}).catch(function(){})}

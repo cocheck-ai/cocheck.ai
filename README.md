@@ -13,10 +13,8 @@ date: 2026-01-31
 summary: Optional one-line summary shown on the index.
 ---
 
-Body in Markdown: headings, paragraphs, emphasis, links, lists, blockquotes, inline code, code blocks.
+Body in Markdown: headings, paragraphs, emphasis, links, lists, blockquotes, inline code, code blocks, footnotes (`[^label]` references, `[^label]: text` definitions; indent continuation lines). Undefined or unreferenced footnotes fail the build.
 ```
-
-`essays-src/example.md` is a placeholder; delete it when real essays exist.
 
 ## Build
 
