@@ -1,0 +1,18 @@
+# CoCheck
+
+> CoCheck records what AI agents (Claude Code, Codex, Copilot) change in a person's files and shows every change on a local review page, before and after, with the agent action that made it. It runs on the person's own machine and sends nothing anywhere by default. It is a preview release: macOS, or Windows with Claude Code as a test build; Node 22.18 or newer.
+
+Install on a Mac with `brew install cocheck-ai/tap/cocheck` or on a Mac or Windows with `npm install -g cocheck`, then run `cocheck install --home ~/CoCheckData` from the folder CoCheck should watch. `--home` is required, has no default, and must be an absolute path. Ask the person before installing. Where this file and docs/install.md disagree, docs/install.md wins.
+
+## Docs
+
+- [AGENTS.md](https://raw.githubusercontent.com/cocheck-ai/cocheck/main/AGENTS.md): what CoCheck is, how it works, its state, and how to install and use it for a person
+- [README](https://raw.githubusercontent.com/cocheck-ai/cocheck/main/README.md): overview, the author's notes and known limits, install and use
+- [Install guide](https://raw.githubusercontent.com/cocheck-ai/cocheck/main/docs/install.md): install, start and stop tracking, the review page, uninstall, troubleshooting
+- [Connector guide](https://raw.githubusercontent.com/cocheck-ai/cocheck/main/public-kit/GUIDE.md): build a connector so CoCheck can read another file type or app
+- [Connector standard v1](https://raw.githubusercontent.com/cocheck-ai/cocheck/main/public-kit/spec/v1.md): the connector specification
+
+## Optional
+
+- [Repository](https://github.com/cocheck-ai/cocheck): source code, issues and releases
+- [Essays](https://cocheck.ai/essays/): essays from the CoCheck project

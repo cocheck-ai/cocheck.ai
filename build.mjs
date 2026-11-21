@@ -8,6 +8,9 @@ const SRC = join(root, "essays-src");
 const OUT = join(root, "docs");
 const REPO = "https://github.com/cocheck-ai/cocheck";
 const RELEASES = `${REPO}/releases`;
+const SITE = "https://cocheck.ai/";
+const RAW = "https://raw.githubusercontent.com/cocheck-ai/cocheck/main";
+const INSTALL_DOC = `${REPO}/blob/main/docs/install.md`;
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -219,7 +222,10 @@ pre code{background:none;padding:0}
 .install{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s2);margin:0 0 var(--s4)}
 .cmd{position:relative;background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r);box-shadow:var(--shadow-1);padding:var(--s2);min-width:0}
 .cmd .quiet{display:block;margin-bottom:var(--s1)}
-.cmd code{display:block;background:none;padding:0;white-space:nowrap;overflow-x:auto}
+.cmd code{display:block;background:none;padding:0;white-space:pre;overflow-x:auto;padding-right:72px}
+.install-notes{color:var(--ink-2);font-size:var(--fs-sm);line-height:1.6;max-width:44em;margin:0 0 var(--s4)}
+.install-notes p{margin:0 0 var(--s1)}
+.install-notes p:last-child{margin:0}
 .copy{position:absolute;right:var(--s1);top:var(--s1);font:500 var(--fs-sm)/1 var(--font);color:var(--ink);background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-sm);padding:8px 12px;cursor:pointer}
 .copy:hover{background:var(--well)}
 .copy.done{color:var(--pass)}
@@ -315,8 +321,25 @@ const BANNER_JS = `(function(){var a=document.getElementById("rel");if(a&&window
 document.querySelectorAll("[data-copy]").forEach(function(box){var code=box.querySelector("code"),b=document.createElement("button");b.type="button";b.className="copy";b.textContent="Copy";b.setAttribute("aria-label","Copy command");b.onclick=function(){var txt=code.textContent,ok=function(){b.textContent="Copied";b.classList.add("done");setTimeout(function(){b.textContent="Copy";b.classList.remove("done")},1600)};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok,function(){})}else{var r=document.createRange();r.selectNodeContents(code);var s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand("copy");ok()}catch(e){}}};box.appendChild(b)})})();`;
 
 let ESSAYS = [];
-function page({ title, desc, body, base, current, side = true, nav = "" }) {
+function page({ title, desc, body, base, current, side = true, nav = "", path = null, type = "website" }) {
   const p = base;
+  const url = path === null ? null : SITE + path;
+  const social = [
+    `<meta property="og:site_name" content="CoCheck">`,
+    `<meta property="og:type" content="${type}">`,
+    `<meta property="og:title" content="${esc(title)}">`,
+    `<meta property="og:description" content="${esc(desc)}">`,
+    url ? `<meta property="og:url" content="${esc(url)}">` : "",
+    `<meta property="og:image" content="${SITE}assets/icon-180.png">`,
+    `<meta property="og:image:width" content="180">`,
+    `<meta property="og:image:height" content="180">`,
+    `<meta property="og:image:alt" content="CoCheck icon">`,
+    `<meta name="twitter:card" content="summary">`,
+    `<meta name="twitter:title" content="${esc(title)}">`,
+    `<meta name="twitter:description" content="${esc(desc)}">`,
+    `<meta name="twitter:image" content="${SITE}assets/icon-180.png">`,
+    url ? `<link rel="canonical" href="${esc(url)}">` : "",
+  ].filter(Boolean).join("\n");
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -325,6 +348,7 @@ function page({ title, desc, body, base, current, side = true, nav = "" }) {
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
 <meta name="color-scheme" content="light dark">
+${social}
 <link rel="icon" type="image/svg+xml" href="${p}assets/icon.svg">
 <link rel="icon" type="image/png" sizes="180x180" href="${p}assets/icon-180.png">
 <link rel="apple-touch-icon" href="${p}assets/icon-180.png">
@@ -332,9 +356,9 @@ function page({ title, desc, body, base, current, side = true, nav = "" }) {
 </head>
 <body>
 <div class="bar" id="banner"><a id="rel" href="${RELEASES}">CoCheck on GitHub</a></div>
-<div class="wrap"><header class="site"><a class="brand" href="${p}index.html" aria-label="CoCheck home"><picture><source srcset="${p}assets/wordmark-dark.png" media="(prefers-color-scheme: dark)"><img class="wm" src="${p}assets/wordmark-light.png" width="112" height="30" alt="CoCheck"></picture></a><nav><a href="${p}index.html"${nav === "home" ? ' aria-current="page"' : ""}>Home</a><a href="${p}essays/index.html"${nav === "essays" ? ' aria-current="page"' : nav === "essay" ? ' aria-current="true"' : ""}>Essays</a></nav></header>
+<div class="wrap"><header class="site"><a class="brand" href="${p}index.html" aria-label="CoCheck home"><picture><source srcset="${p}assets/wordmark-dark.png" media="(prefers-color-scheme: dark)"><img class="wm" src="${p}assets/wordmark-light.png" width="112" height="30" alt="CoCheck"></picture></a><nav><a href="${p}index.html"${nav === "home" ? ' aria-current="page"' : ""}>Home</a><a href="${p}essays/index.html"${nav === "essays" ? ' aria-current="page"' : nav === "essay" ? ' aria-current="true"' : ""}>Essays</a><a href="${REPO}">GitHub</a></nav></header>
 <div class="shell${side ? "" : " solo"}"><main class="main">${body}</main>${side ? sidebar(p, current) : ""}</div></div>
-<footer><div class="wrap"><span>CoCheck is a preview release.</span></div></footer>
+<footer><div class="wrap"><span>CoCheck is a preview release.</span><span><a href="${REPO}#readme">README on GitHub</a></span></div></footer>
 <script>${BANNER_JS}</script>
 </body>
 </html>
@@ -347,8 +371,15 @@ const homeBody = () => `<section class="hero">
 <h1>Keeping You in the Driver's Seat</h1>
 <p class="lede">CoCheck shows what AI agents changed in your files, step by step.</p>
 <div class="install">
-<div class="cmd" data-copy><span class="quiet">macOS, Homebrew</span><code>brew install cocheck-ai/tap/cocheck</code></div>
-<div class="cmd" data-copy><span class="quiet">macOS and Windows, npm</span><code>npm install -g cocheck</code></div>
+<div class="cmd" data-copy><span class="quiet">On a Mac</span><code>brew install cocheck-ai/tap/cocheck
+cocheck install --home ~/CoCheckData</code></div>
+<div class="cmd" data-copy><span class="quiet">On a Mac or Windows</span><code>npm install -g cocheck
+cocheck install --home ~/CoCheckData</code></div>
+</div>
+<div class="install-notes">
+<p><code>--home</code> must be an absolute path. On Windows, cmd and Windows PowerShell pass <code>~</code> through unexpanded, so use <code>cocheck install --home "$env:USERPROFILE\\CoCheckData" --for claude</code> in PowerShell.</p>
+<p>Run <code>cocheck install</code> from the folder you want CoCheck to watch, or pass <code>--folder &lt;dir&gt;</code>. Then restart your agent, start a session, say "start tracking", do some work, and say "show me the review".</p>
+<p><a href="${INSTALL_DOC}">Full install guide</a> &middot; <a href="${REPO}#readme">README on GitHub</a></p>
 </div>
 <figure class="demo" aria-label="Illustration of a CoCheck change card: a sentence before and after an agent edit, labelled with the agent action that made it">
 <div class="top"><b>contract-notes.md</b><span class="quiet">Review &middot; change 3 of 7</span></div>
@@ -392,11 +423,34 @@ ESSAYS = essays;
 
 for (const f of readdirSync(join(root, "assets"))) copyFileSync(join(root, "assets", f), join(OUT, "assets", f));
 
-write("index.html", page({ title: "CoCheck: see what your AI agents changed", desc: "CoCheck shows what AI agents changed in your files, step by step, on a before-and-after review page.", body: homeBody(), base: "", nav: "home" }));
-write("essays/index.html", page({ title: "Essays - CoCheck", desc: "Essays from the CoCheck project.", side: false, nav: "essays", body: `<h1>Essays</h1>\n<ul class="list">\n${essayItems(essays.map((e) => ({ ...e, href: `${e.slug}.html` })))}\n</ul>`, base: "../" }));
+write("index.html", page({ title: "CoCheck: see what your AI agents changed", desc: "CoCheck shows what AI agents changed in your files, step by step, on a before-and-after review page.", body: homeBody(), base: "", nav: "home", path: "" }));
+write("essays/index.html", page({ title: "Essays - CoCheck", desc: "Essays from the CoCheck project.", side: false, nav: "essays", path: "essays/", body: `<h1>Essays</h1>\n<ul class="list">\n${essayItems(essays.map((e) => ({ ...e, href: `${e.slug}.html` })))}\n</ul>`, base: "../" }));
 for (const e of essays) {
-  write(`essays/${e.slug}.html`, page({ title: `${e.title} - CoCheck`, desc: e.summary || e.title, base: "../", current: e.slug, nav: "essay", body: `<article><h1>${esc(e.title)}</h1>\n<p class="meta"><time datetime="${esc(e.date)}">${esc(prettyDate(e.date))}</time></p>\n${e.html}</article>` }));
+  write(`essays/${e.slug}.html`, page({ title: `${e.title} - CoCheck`, desc: e.summary || e.title, base: "../", current: e.slug, nav: "essay", path: `essays/${e.slug}.html`, type: "article", body: `<article><h1>${esc(e.title)}</h1>\n<p class="meta"><time datetime="${esc(e.date)}">${esc(prettyDate(e.date))}</time></p>\n${e.html}</article>` }));
 }
+// GitHub Pages serves 404.html at any depth, so it links from the site root
+write("404.html", page({ title: "Page not found - CoCheck", desc: "This page does not exist on cocheck.ai.", base: "/", side: false, body: `<section class="hero"><h1>Page not found</h1>
+<p class="lede">There is nothing at this address. It may have moved, or the link may be wrong.</p>
+<p><a href="/">Go to the home page</a> &middot; <a href="/essays/">Read the essays</a> &middot; <a href="${REPO}">CoCheck on GitHub</a></p></section>` }));
+write("llms.txt", `# CoCheck
+
+> CoCheck records what AI agents (Claude Code, Codex, Copilot) change in a person's files and shows every change on a local review page, before and after, with the agent action that made it. It runs on the person's own machine and sends nothing anywhere by default. It is a preview release: macOS, or Windows with Claude Code as a test build; Node 22.18 or newer.
+
+Install on a Mac with \`brew install cocheck-ai/tap/cocheck\` or on a Mac or Windows with \`npm install -g cocheck\`, then run \`cocheck install --home ~/CoCheckData\` from the folder CoCheck should watch. \`--home\` is required, has no default, and must be an absolute path. Ask the person before installing. Where this file and docs/install.md disagree, docs/install.md wins.
+
+## Docs
+
+- [AGENTS.md](${RAW}/AGENTS.md): what CoCheck is, how it works, its state, and how to install and use it for a person
+- [README](${RAW}/README.md): overview, the author's notes and known limits, install and use
+- [Install guide](${RAW}/docs/install.md): install, start and stop tracking, the review page, uninstall, troubleshooting
+- [Connector guide](${RAW}/public-kit/GUIDE.md): build a connector so CoCheck can read another file type or app
+- [Connector standard v1](${RAW}/public-kit/spec/v1.md): the connector specification
+
+## Optional
+
+- [Repository](${REPO}): source code, issues and releases
+- [Essays](${SITE}essays/): essays from the CoCheck project
+`);
 write("CNAME", "cocheck.ai\n");
 write(".nojekyll", "");
-console.log(`built ${essays.length} essay(s) + 2 pages into docs/`);
+console.log(`built ${essays.length} essay(s) + 2 pages, 404.html and llms.txt into docs/`);
