@@ -6,6 +6,20 @@
 <title>CoCheck: see what your AI agents changed</title>
 <meta name="description" content="CoCheck shows what AI agents changed in your files, step by step, on a before-and-after review page.">
 <meta name="color-scheme" content="light dark">
+<meta property="og:site_name" content="CoCheck">
+<meta property="og:type" content="website">
+<meta property="og:title" content="CoCheck: see what your AI agents changed">
+<meta property="og:description" content="CoCheck shows what AI agents changed in your files, step by step, on a before-and-after review page.">
+<meta property="og:url" content="https://cocheck.ai/">
+<meta property="og:image" content="https://cocheck.ai/assets/icon-180.png">
+<meta property="og:image:width" content="180">
+<meta property="og:image:height" content="180">
+<meta property="og:image:alt" content="CoCheck icon">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CoCheck: see what your AI agents changed">
+<meta name="twitter:description" content="CoCheck shows what AI agents changed in your files, step by step, on a before-and-after review page.">
+<meta name="twitter:image" content="https://cocheck.ai/assets/icon-180.png">
+<link rel="canonical" href="https://cocheck.ai/">
 <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
 <link rel="icon" type="image/png" sizes="180x180" href="assets/icon-180.png">
 <link rel="apple-touch-icon" href="assets/icon-180.png">
@@ -83,7 +97,10 @@ pre code{background:none;padding:0}
 .install{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s2);margin:0 0 var(--s4)}
 .cmd{position:relative;background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r);box-shadow:var(--shadow-1);padding:var(--s2);min-width:0}
 .cmd .quiet{display:block;margin-bottom:var(--s1)}
-.cmd code{display:block;background:none;padding:0;white-space:nowrap;overflow-x:auto}
+.cmd code{display:block;background:none;padding:0;white-space:pre;overflow-x:auto;padding-right:72px}
+.install-notes{color:var(--ink-2);font-size:var(--fs-sm);line-height:1.6;max-width:44em;margin:0 0 var(--s4)}
+.install-notes p{margin:0 0 var(--s1)}
+.install-notes p:last-child{margin:0}
 .copy{position:absolute;right:var(--s1);top:var(--s1);font:500 var(--fs-sm)/1 var(--font);color:var(--ink);background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-sm);padding:8px 12px;cursor:pointer}
 .copy:hover{background:var(--well)}
 .copy.done{color:var(--pass)}
@@ -177,13 +194,20 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s2);flex-wrap:
 </head>
 <body>
 <div class="bar" id="banner"><a id="rel" href="https://github.com/cocheck-ai/cocheck/releases">CoCheck on GitHub</a></div>
-<div class="wrap"><header class="site"><a class="brand" href="index.html" aria-label="CoCheck home"><picture><source srcset="assets/wordmark-dark.png" media="(prefers-color-scheme: dark)"><img class="wm" src="assets/wordmark-light.png" width="112" height="30" alt="CoCheck"></picture></a><nav><a href="index.html" aria-current="page">Home</a><a href="essays/index.html">Essays</a></nav></header>
+<div class="wrap"><header class="site"><a class="brand" href="index.html" aria-label="CoCheck home"><picture><source srcset="assets/wordmark-dark.png" media="(prefers-color-scheme: dark)"><img class="wm" src="assets/wordmark-light.png" width="112" height="30" alt="CoCheck"></picture></a><nav><a href="index.html" aria-current="page">Home</a><a href="essays/index.html">Essays</a><a href="https://github.com/cocheck-ai/cocheck">GitHub</a></nav></header>
 <div class="shell"><main class="main"><section class="hero">
 <h1>Keeping You in the Driver's Seat</h1>
 <p class="lede">CoCheck shows what AI agents changed in your files, step by step.</p>
 <div class="install">
-<div class="cmd" data-copy><span class="quiet">macOS, Homebrew</span><code>brew install cocheck-ai/tap/cocheck</code></div>
-<div class="cmd" data-copy><span class="quiet">macOS and Windows, npm</span><code>npm install -g cocheck</code></div>
+<div class="cmd" data-copy><span class="quiet">On a Mac</span><code>brew install cocheck-ai/tap/cocheck
+cocheck install --home ~/CoCheckData</code></div>
+<div class="cmd" data-copy><span class="quiet">On a Mac or Windows</span><code>npm install -g cocheck
+cocheck install --home ~/CoCheckData</code></div>
+</div>
+<div class="install-notes">
+<p><code>--home</code> must be an absolute path. On Windows, cmd and Windows PowerShell pass <code>~</code> through unexpanded, so use <code>cocheck install --home "$env:USERPROFILE\CoCheckData" --for claude</code> in PowerShell.</p>
+<p>Run <code>cocheck install</code> from the folder you want CoCheck to watch, or pass <code>--folder &lt;dir&gt;</code>. Then restart your agent, start a session, say "start tracking", do some work, and say "show me the review".</p>
+<p><a href="https://github.com/cocheck-ai/cocheck/blob/main/docs/install.md">Full install guide</a> &middot; <a href="https://github.com/cocheck-ai/cocheck#readme">README on GitHub</a></p>
 </div>
 <figure class="demo" aria-label="Illustration of a CoCheck change card: a sentence before and after an agent edit, labelled with the agent action that made it">
 <div class="top"><b>contract-notes.md</b><span class="quiet">Review &middot; change 3 of 7</span></div>
@@ -206,7 +230,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s2);flex-wrap:
 <li><a href="essays/0-preface.html"><span class="t">Preface</span><span class="quiet">November 20, 2026 &middot; We find ourselves at an unbelievable moment in time.</span></a></li>
 <li><a href="essays/1-on-the-definition-of-work.html"><span class="t">On the Definition of Work</span><span class="quiet">November 20, 2026 &middot; With that throat clearing out of the way, I have to admit that I struggled to find a good place to start.</span></a></li>
 </ul></div></aside></div></div>
-<footer><div class="wrap"><span>CoCheck is a preview release.</span></div></footer>
+<footer><div class="wrap"><span>CoCheck is a preview release.</span><span><a href="https://github.com/cocheck-ai/cocheck#readme">README on GitHub</a></span></div></footer>
 <script>(function(){var a=document.getElementById("rel");if(a&&window.fetch){var c=window.AbortController?new AbortController():null,t=setTimeout(function(){if(c)c.abort()},3000);fetch("https://registry.npmjs.org/cocheck/latest",{signal:c?c.signal:undefined}).then(function(r){return r.ok?r.json():null}).then(function(j){clearTimeout(t);if(j&&typeof j.version==="string"&&/^[0-9A-Za-z.+-]{1,40}$/.test(j.version))a.textContent="CoCheck "+j.version+" is out"}).catch(function(){})}
 document.querySelectorAll("[data-copy]").forEach(function(box){var code=box.querySelector("code"),b=document.createElement("button");b.type="button";b.className="copy";b.textContent="Copy";b.setAttribute("aria-label","Copy command");b.onclick=function(){var txt=code.textContent,ok=function(){b.textContent="Copied";b.classList.add("done");setTimeout(function(){b.textContent="Copy";b.classList.remove("done")},1600)};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok,function(){})}else{var r=document.createRange();r.selectNodeContents(code);var s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand("copy");ok()}catch(e){}}};box.appendChild(b)})})();</script>
 </body>
