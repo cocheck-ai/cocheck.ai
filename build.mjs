@@ -418,7 +418,7 @@ const essays = readdirSync(SRC).filter((f) => f.endsWith(".md")).sort().map((f) 
   const lead = body.match(/^\s*#\s+(.*?)\s*#*\s*(\n|$)/);
   const text = lead && lead[1] === meta.title ? body.slice(lead[0].length) : body;
   return { slug, ...meta, html: essayHtml(text, f) };
-}).sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
+}); // reading order: the filename's number prefix (0-, 1-, 2-...), not the date
 ESSAYS = essays;
 
 for (const f of readdirSync(join(root, "assets"))) copyFileSync(join(root, "assets", f), join(OUT, "assets", f));

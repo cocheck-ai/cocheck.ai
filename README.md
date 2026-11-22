@@ -4,7 +4,7 @@ Static site for https://cocheck.ai. No dependencies, no tracking, no third-party
 
 ## Add an essay
 
-Create `essays-src/<slug>.md` (lowercase letters, digits, hyphens) with front matter, then build:
+Create `essays-src/<n>-<slug>.md` (lowercase letters, digits, hyphens; the number prefix sets the reading order) with front matter, then build:
 
 ```
 ---
