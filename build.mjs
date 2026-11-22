@@ -365,7 +365,7 @@ ${social}
 `;
 }
 
-const essayItems = (list) => list.map((e) => `<li><a href="${e.href}">${esc(e.title)}</a><span class="quiet">${esc(prettyDate(e.date))}${e.summary ? " &middot; " + esc(e.summary) : ""}</span></li>`).join("\n");
+const essayItems = (list) => list.map((e) => `<li><a href="${e.href}">${esc(e.label ?? e.title)}</a><span class="quiet">${esc(prettyDate(e.date))}${e.summary ? " &middot; " + esc(e.summary) : ""}</span></li>`).join("\n");
 
 const homeBody = () => `<section class="hero">
 <h1>Keeping You in the Driver's Seat</h1>
@@ -401,7 +401,7 @@ cocheck install --home ~/CoCheckData</code></div>
 
 const sidebar = (p, current) => `<aside class="side" aria-label="Essays"><div class="side-in"><h2>Essays</h2>
 <ul class="side-list">
-${ESSAYS.map((e) => `<li${e.slug === current ? ' class="current"' : ""}><a href="${p}essays/${e.slug}.html"${e.slug === current ? ' aria-current="page"' : ""}><span class="t">${esc(e.title)}</span><span class="quiet">${esc(prettyDate(e.date))}${e.summary ? " &middot; " + esc(e.summary) : ""}</span></a></li>`).join("\n")}
+${ESSAYS.map((e) => `<li${e.slug === current ? ' class="current"' : ""}><a href="${p}essays/${e.slug}.html"${e.slug === current ? ' aria-current="page"' : ""}><span class="t">${esc(e.label)}</span><span class="quiet">${esc(prettyDate(e.date))}${e.summary ? " &middot; " + esc(e.summary) : ""}</span></a></li>`).join("\n")}
 </ul></div></aside>`;
 
 // ---------- Build ----------
@@ -417,8 +417,9 @@ const essays = readdirSync(SRC).filter((f) => f.endsWith(".md")).sort().map((f) 
   // the essay's own leading "# Title" duplicates the page heading; skip it when it matches the front-matter title
   const lead = body.match(/^\s*#\s+(.*?)\s*#*\s*(\n|$)/);
   const text = lead && lead[1] === meta.title ? body.slice(lead[0].length) : body;
-  return { slug, ...meta, html: essayHtml(text, f) };
-}); // reading order: the filename's number prefix (0-, 1-, 2-...), not the date
+  const num = (slug.match(/^(\d+)-/) ?? [])[1];
+  return { slug, ...meta, label: num === undefined ? meta.title : `${Number(num)}. ${meta.title}`, html: essayHtml(text, f) };
+}).reverse(); // newest first by the filename's number prefix (0-, 1-, 2-...), not the date; lists show "<n>. <title>"
 ESSAYS = essays;
 
 for (const f of readdirSync(join(root, "assets"))) copyFileSync(join(root, "assets", f), join(OUT, "assets", f));
